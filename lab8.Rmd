@@ -1,0 +1,68 @@
+---
+title: "Лабораторная работа №8 – Работа с web-данными"
+author: "Razor_Z_Pi"
+date: "2024-05-28"
+output: html_document
+---
+
+## Практическая часть
+
+Задание 1 – Используя данные варианты постройте датафрейм, содержащий следующие сведения о художественных фильмах: название, жанры (все жанры к которым относится фильм), продолжительность, рейтинг IMDB.
+
+## Вариант 14 – Комедии 1995 года.
+```{r }
+library(rvest)
+library(stringr)
+
+url <- read_html("https://www.imdb.com/search/title/?title_type=feature&release_date=1995-01-01,1995-12-31&genres=comedy")
+
+ name <- url %>%
+   html_nodes("a.ipc-title-link-wrapper") %>%
+   html_text()%>%
+   str_remove_all("[()\n0-9.]") %>%
+   str_trim
+
+name 
+
+times <- url %>%
+  html_nodes("div.sc-b189961a-7") %>%
+  html_text() %>%
+  str_trim
+
+times
+
+ratings <- url %>%
+  html_nodes("span.ipc-rating-star--voteCount") %>%
+  html_text() %>%
+  str_trim
+
+ratings
+
+comedy <- data.frame("Название фильма" = name, "Продолжительность" = times, "Рейтинг" = ratings)
+comedy
+```
+
+Задание 2 – Установите пакет pageviews и прочитайте документацию по основным функциям. Используя функции пакета соберите информацию по посещению страниц Википедии с описанием языка программирования. Составьте временной ряд (с помощью функции ts()), содержащий сведения о посещении страниц соответствующего языка по месяцам начиная с января 2010 года (для новых языков с даты появления страницы) по март 2021 года.
+
+## Вариант 19 – Dart
+
+```{r}
+library(pageviews)
+
+Dart <- article_pageviews(
+  project = 'ru.wikipedia',
+  article = 'Dart',
+  start = "2011101000",
+  end = "2021030100",
+  platform = "all",
+  granularity = "monthly"
+)
+
+# Создаем временной ряд с частотой 12 (для ежемесячных данных)
+Tseries <- ts(Dart$views, start = c(2011, 10), end = c(2021, 3), frequency = 12)
+
+# Выводим результаты
+print(Tseries)
+plot(Tseries, main = "Dart")
+
+```
